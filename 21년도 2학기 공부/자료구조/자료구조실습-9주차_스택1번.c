@@ -8,6 +8,7 @@ typedef struct node{
 }ND;
 typedef struct stack{
     ND *head;
+    ND *top;
     int max_num;
     int cnt;
 }ST;
@@ -26,6 +27,7 @@ int main(){
     stack.head = (ND*)malloc(sizeof(ND));
     stack.head->next = NULL;
     stack.cnt = 0;
+    stack.top = stack.head;
     scanf("%d",&N);
     stack.max_num = N;
     scanf("%d",&num);
@@ -76,11 +78,8 @@ void push(ST *stack, char c){
         new = (ND *)malloc(sizeof(ND));
         new->next = NULL;
         new->data = c;
-        p = stack->head;
-        for(i=0;i<stack->cnt;i++){
-            p = p->next;
-        }
-        p->next = new;
+        stack->top->next = new;
+        stack->top = new;
         stack->cnt += 1;
         return;
     }
@@ -97,25 +96,20 @@ char pop(ST *stack){
     for(i=0;i<stack->cnt-1;i++){
         p = p->next;
     }
-    q = p->next;
+    q = stack->top;
     ch = q->data;
     p->next = NULL;
     free(q);
     stack->cnt -= 1;
+    stack->top = p;
     return ch;
 }
 void peek(ST *stack){
-    ND *p;
-    int i;
     if(stack->cnt == 0){
         printf("Stack Empty\n");
         return;
     }
-    p = stack->head;
-    for(i=0;i<stack->cnt;i++){
-        p = p->next;
-    }
-    printf("%c\n",p->data);
+    printf("%c\n",stack->top->data);
     return;
 }
 void duplicate(ST *stack){
@@ -140,6 +134,7 @@ void downRotate(ST *stack, int n){
     sub_stack.cnt = 0;
     sub_stack.head->next = NULL;
     sub_stack.max_num = 1000000;
+    sub_stack.top = sub_stack.head;
     for(i=0;i<n-1;i++){
         push(&sub_stack,pop(stack));
     }
@@ -161,6 +156,7 @@ void upRotate(ST *stack, int n){
     sub_stack.cnt = 0;
     sub_stack.head->next = NULL;
     sub_stack.max_num = 1000000;
+    sub_stack.top = sub_stack.head;
     ch = pop(stack);
     num = stack->cnt;
     for(i=0;i<n-1;i++){
@@ -180,6 +176,7 @@ void print(ST *stack){
     sub_stack.head = (ND*)malloc(sizeof(ND));
     sub_stack.cnt = 0;
     sub_stack.head->next = NULL;
+    sub_stack.top = sub_stack.head;
     sub_stack.max_num = 1000000;
     num = stack->cnt;
     for(i=0;i<num;i++){
