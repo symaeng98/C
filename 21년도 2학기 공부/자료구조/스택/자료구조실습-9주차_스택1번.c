@@ -62,7 +62,7 @@ int main(){
             print(&stack);
         }
         else{
-            printf("ÀÔ·Â Àß¸øµÊ\n");
+            printf("ì…ë ¥ ì˜ëª»ë¨\n");
         }
     }
     return 0;
