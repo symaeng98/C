@@ -9,16 +9,15 @@ typedef struct Node{
 }ND;
 void add_front(ND *deque, int X);
 void add_rear(ND *deque, int X);
-void delete_front(ND *deque);
-void delete_rear(ND *deque);
+int delete_front(ND *deque);
+int delete_rear(ND *deque);
 void print(ND *deque);
 
 int main(){
-    int i, N, data;
+    int i, N, data, num=0;
     char ch[4];
-    ND *front, *rear;
+    ND *front, *rear, *new, *p;
     front = rear = NULL;
-    
     scanf("%d",&N);
     getchar();
     for(i=0;i<N;i++){
@@ -27,23 +26,38 @@ int main(){
             scanf("%d",&data);
             getchar();
             add_front(front, data);
+            printf("woi");
+            printf("%d",front->data);
+            front = front->prev;
+            num++;
         }
         else if(!strcmp(ch,"AR")){
             scanf("%d",&data);
             getchar();
             add_rear(rear, data);
+            rear = rear->next;
+            num++;
         }
         else if(!strcmp(ch,"DF")){
+            if(!num){
+                break;
+            }
             delete_front(front);
+            num--;
         }
         else if(!strcmp(ch,"DR")){
+            if(!num){
+                break;
+            }
             delete_rear(rear);
+            num--;
         }
         else if(!strcmp(ch,"P")){
             print(front);
+            printf("%d\n",front->data);
         }
         else{
-            printf("ìž…ë ¥ ìž˜ëª»ë¨\n");
+            printf("ÀÔ·Â Àß¸øµÊ\n");
         }
     }
     
@@ -52,21 +66,37 @@ int main(){
 
 void add_front(ND *deque, int X){
     ND *newnode;
+    if(deque == NULL){
+        newnode = (ND*)malloc(sizeof(ND));
+        newnode->data = X;
+        newnode->next = newnode->prev = NULL;
+        deque = newnode;
+        return;
+    }
     newnode = (ND*)malloc(sizeof(ND));
     newnode->data = X;
-    newnode->prev = NULL;
     newnode->next = deque;
     deque->prev = newnode;
-    deque = newnode;
-    return;
 }
 void add_rear(ND *deque, int X){
-
+    ND *newnode;
+    if(deque == NULL){
+        newnode = (ND*)malloc(sizeof(ND));
+        newnode->data = X;
+        newnode->next = newnode->prev = NULL;
+        deque = newnode;
+        return;
+    }
+    newnode = (ND*)malloc(sizeof(ND));
+    newnode->data = X;
+    newnode->prev = deque;
+    deque->next = newnode;
 }
-void delete_front(ND *deque){
-
+int delete_front(ND *deque){
+    deque->next->prev = NULL;
+    deque->next = NULL;
 }
-void delete_rear(ND *deque){
+int delete_rear(ND *deque){
 
 }
 void print(ND *deque){
@@ -74,6 +104,6 @@ void print(ND *deque){
         printf(" %d",deque->data);
         deque = deque->next;
     }
-    printf(" %d",deque->data);
+    printf(" %d\n",deque->data);
     return;
 }
