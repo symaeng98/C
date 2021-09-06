@@ -1,129 +1,142 @@
-#pragma warning(disable:4996)
+#pragma warning(disable : 4996)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct node {
-	struct node *next;
-	struct node *prev;
-	int data;
+typedef struct Node{
+    int data;
+    struct Node *next;
+    struct Node *prev;
 }ND;
-void add_front(ND *q, int data);
-void add_rear(ND *q, int data);
-int delete_front(ND *q);
-int delete_rear(ND *q);
-void print(ND *q);
-int main() {
-	int N, i, data, deqnum = 0;
-	char ch[3];
-	ND *front, *rear,*del;
-	rear = front = NULL;
-	scanf("%d", &N);
-	getchar();
-	for (i = 0; i < N; i++) {
-		scanf("%s", ch);
-		if (ch[0] == 'A'&&ch[1] == 'F') {
-			scanf("%d", &data);
-			getchar();
-			if (deqnum==0) {
-				rear = (ND *)malloc(sizeof(ND));
-				rear->data = data;
-				rear->next = NULL;
-				rear->prev = NULL;
+void add_front(ND **deque, int X);
+void add_rear(ND **deque, int X);
+int delete_front(ND **deque);
+int delete_rear(ND **deque);
+void print(ND *deque);
+
+int main(){
+    int i, N, data, num=0;
+    char ch[4];
+    ND *front, *rear, *new, *p;
+    front = rear = NULL;
+    scanf("%d",&N);
+    getchar();
+    for(i=0;i<N;i++){
+        scanf("%s",ch);
+        if(!strcmp(ch,"AF")){
+            scanf("%d",&data);
+            getchar();
+            add_front(&front, data);
+			if(!num){
+				rear = front;
+			}
+            num++;
+        }
+        else if(!strcmp(ch,"AR")){
+            scanf("%d",&data);
+            getchar();
+            add_rear(&rear, data);
+			if(!num){
 				front = rear;
 			}
-			else {
-				add_front(front, data);
-				front = front->prev;
-			}
-			deqnum++;
-		}
-		else if (ch[0] == 'A'&&ch[1] == 'R') {
-			scanf("%d", &data);
-			getchar();
-			if (deqnum==0) {
-				rear = (ND *)malloc(sizeof(ND));
-				rear->data = data;
-				rear->next = NULL;
-				rear->prev = NULL;
-				front = rear;
-			}
-			else {
-				add_rear(rear, data);
-				rear = rear->next;
-			}
-			deqnum++;
-		}
-		else if (ch[0] == 'D'&&ch[1] == 'F') {
-			if (deqnum == 0) {
-				printf("underflow\n");
-				return 0;
-			}
-			if (deqnum == 1) {
-				del = front;
-				front = front->prev;
-				rear = rear->next;
-				free(del);
-			}
-			else {
-				front = front->next;
-				delete_front(front);
-			}
-			deqnum--;
-		}
-		else if (ch[0] == 'D'&&ch[1] == 'R') {
-			if (deqnum == 0) {
-				printf("underflow");
-				return 0;
-			}
-			if (deqnum == 1) {
-				del = rear;
-				front = front->prev;
-				rear = rear->next;
-				free(del);
-			}
-			else {
-				rear = rear->prev;
-				delete_rear(rear);
-			}
-			deqnum--;
-		}
-		else if (ch[0] = 'P') {
-			print(front);
-		}
-	}
+            num++;
+        }
+        else if(!strcmp(ch,"DF")){
+            if(!num){
+                printf("underflow\n");
+                break;
+            }
+            delete_front(&front);
+            num--;
+        }
+        else if(!strcmp(ch,"DR")){
+            if(!num){
+                printf("underflow\n");
+                break;
+            }
+            delete_rear(&rear);
+            num--;
+        }
+        else if(!strcmp(ch,"P")){
+            print(front);
+        }
+        else{
+            printf("ÀÔ·Â Àß¸øµÊ\n");
+        }
+    }
+    
+    return 0;
 }
-void add_front(ND *q, int data) {
-	ND *p;
-	p = (ND *)malloc(sizeof(ND));
-	p->data = data;
-	p->next = q->prev;
-	q->prev = p;
-	p->next = q;
+
+void add_front(ND **deque, int X){
+    ND *newnode;
+    if(*deque == NULL){
+        newnode = (ND*)malloc(sizeof(ND));
+        newnode->data = X;
+        newnode->next = newnode->prev = NULL;
+        *deque = newnode;
+        return;
+    }
+    newnode = (ND*)malloc(sizeof(ND));
+    newnode->data = X;
+    newnode->next = *deque;
+	newnode->prev = NULL;
+    (*deque)->prev = newnode; 
+    *deque = newnode;
 }
-void add_rear(ND *q, int data) {
-	ND *p;
-	p = (ND *)malloc(sizeof(ND));
-	p->data = data;
-	p->next = q->next;
-	q->next = p;
-	p->prev = q;
+void add_rear(ND **deque, int X){
+    ND *newnode;
+    if(*deque == NULL){
+        newnode = (ND*)malloc(sizeof(ND));
+        newnode->data = X;
+        newnode->next = newnode->prev = NULL;
+        *deque = newnode;
+        return;
+    }
+    newnode = (ND*)malloc(sizeof(ND));
+    newnode->data = X;
+    newnode->prev = *deque;
+	newnode->next = NULL;
+    (*deque)->next = newnode; 
+    *deque = newnode;
 }
-int delete_front(ND *q) {
-	ND *del;
-	del = q->prev;
-	q->prev = NULL;
-	free(del);
+int delete_front(ND **deque){
+    ND *p;
+    int a;
+    if((*deque)->next == NULL){
+        p = *deque;
+        a = (*deque)->data;
+        *deque = NULL;
+        free(p);
+        return a;
+    }
+    p = *deque;
+    (*deque)->next->prev = NULL;
+    *deque = (*deque)->next;
+    p->next = NULL;
+    free(p);
+
 }
-int delete_rear(ND *q) {
-	ND *del;
-	del = q->next;
-	q->next = NULL;
-	free(del);
+int delete_rear(ND **deque){
+    ND *p;
+    int a;
+    if((*deque)->prev == NULL){
+        p = *deque;
+        a = (*deque)->data;
+        *deque = NULL;
+        free(p);
+        return a;
+    }
+    p = *deque;
+    (*deque)->prev->next = NULL;
+    *deque = (*deque)->prev;
+    p->prev = NULL;
+    free(p);
 }
-void print(ND *q) {
-	while (q!= NULL) {
-		printf(" %d", q->data);
-		q = q->next;
-	}
-	printf("\n");
+void print(ND *deque){
+    while(deque->next!=NULL){
+        printf(" %d",deque->data);
+        deque = deque->next;
+    }
+    printf(" %d\n",deque->data);
+    return;
 }
