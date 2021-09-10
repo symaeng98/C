@@ -34,7 +34,7 @@ int main(){
     getchar();
     for(i=0;i<num;i++){
         scanf("%s",ch);
-        if (!strcmp(ch,"PUSH")){
+        if (!strcmp(ch,"*")){
             getchar();
             scanf("%c",&data);
             push(&stack, data);
@@ -62,7 +62,7 @@ int main(){
             print(&stack);
         }
         else{
-            printf("ìž…ë ¥ ìž˜ëª»ë¨\n");
+            printf("?ž…? ¥ ?ž˜ëª»ë¨\n");
         }
     }
     return 0;
