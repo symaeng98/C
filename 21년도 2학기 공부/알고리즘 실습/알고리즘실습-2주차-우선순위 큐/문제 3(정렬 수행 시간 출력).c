@@ -4,6 +4,7 @@
 #include <windows.h>
 void selection_sort(int *arr, int N);
 void insertion_sort(int *arr, int N);
+void insertion_sort2(int *arr, int N);
 int main() {
     int N, *arrA, *arrB, i, j, max_index, tmp;
     scanf("%d",&N);
