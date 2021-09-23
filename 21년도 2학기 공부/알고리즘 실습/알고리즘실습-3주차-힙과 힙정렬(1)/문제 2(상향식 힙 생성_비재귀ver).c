@@ -1,62 +1,66 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//전역 변수 선언
-int heap[101], n=0;
+typedef struct heap{
+    int Heap[101];
+    int n;
+}H;
 
 //함수 선언
-void BuildHeap();
-void downHeap(int index);
-void printHeap();
+void BuildHeap(H *heap);
+void downHeap(H *heap, int index);
+void printHeap(H *heap);
 
 void main(){
     int N, i;
+    H heap, *h;
+    h = &heap;
     scanf("%d",&N);
-    n = N;
+    h->n = N;
     for(i=1;i<=N;i++){
-        scanf("%d",&heap[i]);
+        scanf("%d",&h->Heap[i]);
     }
-    BuildHeap();
-    printHeap();
+    BuildHeap(h);
+    printHeap(h);
     return;
 }
-void BuildHeap(){
+void BuildHeap(H *heap){
     int i;
-    for(i=n/2;i>0;i--){
-        downHeap(i);
+    for(i=heap->n/2;i>0;i--){
+        downHeap(heap, i);
     }
     return;
 }
-void downHeap(int index){
+void downHeap(H *heap, int index){
     int left, right, max_index, tmp;
-    if(n<index*2){ //자식이 없음 //external node임
+    if(heap->n<index*2){ //자식이 없음 //external node임
         return;
     }
-    else if(n==index*2){ //자식이 left만 있음
-        if(heap[index]<heap[index*2]){ //left가 더 크면
-            tmp = heap[index];
-            heap[index] = heap[index*2];
-            heap[index*2] = tmp;
+    else if(heap->n==index*2){ //자식이 left만 있음
+        if(heap->Heap[index]<heap->Heap[index*2]){ //left가 더 크면
+            tmp = heap->Heap[index];
+            heap->Heap[index] = heap->Heap[index*2];
+            heap->Heap[index*2] = tmp;
             return;
         }      
         return;
     }
     else{ //자식이 둘 다 있을 때
-        left = heap[index*2];
-        right = heap[index*2 + 1];
+        left = heap->Heap[index*2];
+        right = heap->Heap[index*2 + 1];
         if(left>right) max_index = index*2;
         else max_index = index*2 + 1;
-        if(heap[index]<heap[max_index]){
-            tmp = heap[index];
-            heap[index] = heap[max_index];
-            heap[max_index] = tmp;
-            downHeap(max_index);
+        if(heap->Heap[index]<heap->Heap[max_index]){
+            tmp = heap->Heap[index];
+            heap->Heap[index] = heap->Heap[max_index];
+            heap->Heap[max_index] = tmp;
+            downHeap(heap, max_index);
         }
     }
 }
-void printHeap(){
+void printHeap(H *heap){
     int i;
-    for(i=1;i<=n;i++)
-        printf(" %d",heap[i]);
+    for(i=1;i<=heap->n;i++)
+        printf(" %d",heap->Heap[i]);
     printf("\n");
 }
