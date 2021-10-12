@@ -20,10 +20,7 @@ int main(){
 int binarySearch(int *arr, int l, int r, int k){
     int m;
     m = (l+r)/2;
-    if(l>=r){
-        if(k<arr[m]) return m-1;
-        else return m;
-    }
+    if(l>r) return r; //r이 m-1이 들어와서 종료되면 r을 return
     if(k == arr[m]) return m;
     else if(k < arr[m]) return binarySearch(arr,l,m-1,k);
     else return binarySearch(arr,m+1,r,k);
