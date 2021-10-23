@@ -19,6 +19,7 @@ int main(){
     for(i=0;i<n;i++){
         printf(" %d",arr[i]);
     }
+    free(arr);
     return 0;
 }
 void inPlaceQuickSort(int *arr, int l, int r){
