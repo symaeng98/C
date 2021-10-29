@@ -13,6 +13,7 @@ typedef struct BST{
 }B;
 int removeElement(B *bst,int k);
 void searchAndFixAfterInsertion(B *bst, ND *node);
+void searchAndFixAfterRemoval(B *bst, ND *node);
 int updateHeight(ND *node);
 int isBalanced(ND *node);
 ND *restructure(ND **x, ND **y, ND **z);
@@ -219,10 +220,33 @@ void searchAndFixAfterInsertion(B *bst, ND *node){
     else x = y->rChild;
     w = restructure(&x,&y,&z);
     if(w->parent==NULL) bst->Root = w;
-    while(w->parent!=NULL){ //한 번으로는 전역적으로 restructure가 되지 않기 때문에 부모로 올라가면서 고쳐야한다.
-        w = w->parent;
-        searchAndFixAfterInsertion(bst,w);
+}
+void searchAndFixAfterRemoval(B *bst, ND *node){
+    ND *w = node;
+    ND *x,*y,*z;
+    updateHeight(bst->Root);
+    while(1){
+        if(w==NULL) return;  
+        if(isBalanced(w)) w=w->parent;
+        else break;
     }
+    
+    z = w;
+    if(z->lChild->height>z->rChild->height) y = z->lChild;
+    else y = z->rChild;
+    if(y->lChild->height>y->rChild->height) x = y->lChild;
+    else if(y->lChild->height==y->rChild->height){
+        if(z->rChild==y) x = y->rChild;
+        else x = y->lChild;
+    }
+    else x = y->rChild;
+    w = restructure(&x,&y,&z);
+    if(w->parent==NULL){
+        bst->Root = w;
+        return;
+    }
+    searchAndFixAfterRemoval(bst,w->parent);
+    
 }
 int updateHeight(ND *node){
     if(isExternal(node)){
@@ -355,7 +379,7 @@ int removeElement(B *bst,int k){
         w->key = y->key;
         zs = reduceExternal(bst,z);
     }
-    searchAndFixAfterInsertion(bst, zs->parent);
+    searchAndFixAfterRemoval(bst, zs->parent);
     printf("%d\n",key);
     return key;
 }
