@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 int insert(int *h, int key, int index, int M, int q);
-int insert2(int *h, int key, int index, int M, int q);
 void search(int *h, int key, int M);
 void print(int *h, int M);
 int main(){
@@ -35,6 +34,7 @@ int main(){
             print(hash, M);
         }
         else if(ch=='e'){
+            print(hash, M);
             break;
         }
         else{
@@ -52,17 +52,7 @@ int insert(int *h, int key, int index, int M, int q){
     }
     else{
         printf("C");
-        return insert2(h,key,(q-(key%q))%M, M, q);
-    }
-}
-int insert2(int *h, int key, int index, int M, int q){
-    if(h[index]==0){
-        h[index] = key;
-        return index;
-    }
-    else{
-        printf("C");
-        return insert2(h,key,index+(q-(key%q))%M, M, q);
+        return insert(h,key,(index+(q-(key%q)))%M, M, q);
     }
 }
 void search(int *h, int key, int M){
