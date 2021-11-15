@@ -84,8 +84,10 @@ void DFS(G *graph, int start){
     p = graph->vertices[start-1].link->next;
     while(p!=NULL){
         if(graph->vertices[p->end-1].visited==0){
+            p->type = 1; //tree
             DFS(graph,p->end);
         }
+        else p->type = 2; //back
         p=p->next;
     }
     return;
