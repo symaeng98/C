@@ -34,7 +34,6 @@ int main(){
         scanf("%d %d",&start,&end);
         graph.matrix[start-1][end-1] = 0; //new
         graph.matrix[end-1][start-1] = 0;
-        graph.edge[] 
     }
     BFS(&graph, s);
     return 0;
