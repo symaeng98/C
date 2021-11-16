@@ -21,7 +21,6 @@ int main(){
     int n, m, s;
     int start, end;
     int i,j;
-    int sum=0,b,ss;
     G graph;
     scanf("%d %d %d",&n,&m,&s);
     graph.vNum = n;
@@ -32,62 +31,63 @@ int main(){
             graph.matrix[i][j] = -1; //초기화
         }
     }
+    
     for(i=0;i<m;i++){
         scanf("%d %d",&start,&end);
-        if(start>end){
-            b = start;
-            ss = end;
-        }
-        else{
-            b = end;
-            ss = start;
-        }
-        for(j=0;j<b-1;j++){
-            sum+=n-j;
-        }
-        sum += (b-ss); //sum은 edge의 index
-        graph.edge[sum].start = start-1;
-        graph.edge[sum].end = end-1;
-        graph.edge[sum].type = 0; //new
-        graph.matrix[start-1][end-1] = sum; //new
-        graph.matrix[end-1][start-1] = sum;
+        graph.edge[i].start = start-1;
+        graph.edge[i].end = end-1;
+        graph.edge[i].type = 0; //new
+        graph.matrix[start-1][end-1] = i; //new
+        graph.matrix[end-1][start-1] = i;
     }
     BFS(&graph, s);
+    
     return 0;
 }
 void BFS(G *graph, int start){
-    int i,p,j, index,q,a;
-    int *list,k=0;
-    list = (int*)malloc(sizeof(int)*graph->vNum);
-    p = k;
-    list[k++] = start;
-    q = k;
-    graph->vertices[start-1].visited = 1;
-    printf("%d\n",graph->vertices[start-1].data);
-    while(k<graph->vNum){
-        a = k;
-        for(i=p;i<q;i++){
-            for(j=0;j<graph->vNum;j++){
-                index = graph->matrix[list[i]-1][j];
+    int front=0,i,j,rear=0;
+    int index;
+    int *queue;
+    queue = (int*)malloc(sizeof(int)*(graph->vNum));
+    queue[rear++] = start;
+    graph->vertices[queue[i]-1].visited=1;
+    while(front!=rear){
+        for(i=front;i<rear;i++){
+            printf("%d\n",graph->vertices[queue[i]-1].data);
+        }
+        j = rear;
+        while(front!=j){
+            for(i=0;i<graph->vNum;i++){
+                index = graph->matrix[queue[front]-1][i];
                 if(index!=-1){
-                    if(graph->edge[index].start!=list[i]-1&&graph->vertices[graph->edge[index].start].visited!=1){
-                        graph->vertices[graph->edge[index].start].visited = 1;
+                    if(graph->edge[index].start!=queue[i]-1&&graph->vertices[graph->edge[index].start].visited==0){ //start가 방문 안했으면    
+                        graph->vertices[graph->edge[index].start].visited=1;
+                        queue[rear++] = graph->vertices[graph->edge[index].start].data; //enqueue
                         graph->edge[index].type = 1;
-                        printf("%d\n",graph->vertices[graph->edge[index].start].data);
-                        list[k++] = graph->edge[index].start+1;
                     }
-                    else if(graph->edge[index].end!=list[i]-1&&graph->vertices[graph->edge[index].end].visited!=1){
-                        graph->vertices[graph->edge[index].end].visited = 1;
-                        graph->edge[index].type = 1;
-                        printf("%d\n",graph->vertices[graph->edge[index].end].data);
-                        list[k++] = graph->edge[index].end+1;
+                    else if(graph->edge[index].end!=queue[i]-1&&graph->vertices[graph->edge[index].end].visited==0){ //end가 방문 안헀으면
+                        graph->vertices[graph->edge[index].end].visited=1;
+                        queue[rear++] = graph->vertices[graph->edge[index].end].data; //enqueue
+                        graph->edge[index].type = 1; //tree
                     }
-                    graph->edge[index].type = 2;
+                    else{
+                        graph->edge[index].type = 2; //cross
+                    }
                 }
             }
+            front++;
         }
-        q = k;
-        p = a;  
     }
-    free(list);
 }
+// 1 2
+// 2 4
+// 4 7
+// 3 6
+// 6 1
+// 7 6
+// 7 8
+// 1 3
+// 2 7
+// 1 4
+// 2 5
+// 7 5
