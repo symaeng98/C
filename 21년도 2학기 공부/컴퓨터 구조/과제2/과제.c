@@ -9,6 +9,8 @@
 //16진수 2진수 변환함수 정의.
 void Convert16to2(char *Hex_array);
 
+//위치 정수로 반환
+int FindLocation(char *index,int indexNum,int a);
 
 
 FILE *fp;
@@ -23,12 +25,21 @@ char binary[33];//16 -> 2진수로 변환 저장 공간
 int main()
 {
 	char str_file[100];
+	char *index;
+	char *tag;
+	int a,bn,i;
+	int sum=0;
+	int total=0;
+	int equal;
 
-	char tag[18]; //tag
+	int blockLocation;
 	int cache_size; //KB
 	int valid; //valid bit
-	int index;
+	int indexNum;
+	int tagNum;
+	char **cache;
 
+	float ratio;
 	int access = 0;
 	int missNum = 0;
 	// Trace file 입력 받기
@@ -40,10 +51,35 @@ int main()
 		printf("file open error");
 		exit(1);
 	}
+	//cache size 입력
 	printf("Unified cache size (KB) : ");
 	scanf("%d",&cache_size);
-	
 
+	//index 비트 수 구하기
+	a = cache_size/32;
+	while(a!=1){
+		a/=2;
+		sum++;
+	}
+	indexNum = 10+sum;
+	tagNum = 32-indexNum-5;
+
+	//block number 구하기
+	sum = indexNum;
+	bn = 1;
+	while(sum!=0){
+		bn*=2;
+		sum--;
+	}
+
+	//index, tag, cache 동적 할당
+	index = (char*)malloc(sizeof(char)*indexNum);
+	tag = (char*)malloc(sizeof(char)*tagNum);
+	cache = (char**)malloc(sizeof(char*)*(bn));
+	for(i=0;i<bn;i++){
+		cache[i] = (char*)malloc(sizeof(char)*(tagNum+2)); //tag와 valid bit와 \n
+		cache[i][0] = '0'; //valid bit 0으로 초기화
+	}
 
 	Hex_array = (char *)malloc(sizeof(char) * 11);
 	
@@ -67,13 +103,49 @@ int main()
 		// }
 		// if(operand == 2)				//inst cache 동작 구현
 		// {
-		// 	printf("inst %d    %s    %s\n",operand, Hex_array, binary);
+		// printf("inst %d    %s    %s\n",operand, Hex_array, binary);
 		// }
 		//data 1    c7e33050    1 1000 1111 1100 0110//0110 0000 10// 10000
-
-
+		for(i=0;i<tagNum;i++){
+			tag[i] = binary[i];
+		}
+		for(i=0;i<indexNum;i++){
+			index[i] = binary[tagNum+i];
+		}
+		blockLocation = FindLocation(index,indexNum,bn);
+		if(cache[blockLocation][0]=='0'){ //valid bit가 0이면
+			missNum++; //miss
+			cache[blockLocation][0]='1'; //valid bit 1로 변경
+			for(i=1;i<=tagNum;i++){ //tag저장
+				cache[blockLocation][i] = tag[i-1];
+			}
+		}
+		else{ //valid bit가 1이면
+			equal=1;
+			for(i=1;i<=tagNum;i++){
+				if(cache[blockLocation][i]!=tag[i-1]){
+					equal = 0;
+					break;
+				}
+			}
+			
+			if(equal){ //tag가 같으면 access
+				access++;
+			}
+			else{//tag가 다르면 replace
+				for(i=1;i<=tagNum;i++){ //tag저장
+					cache[blockLocation][i] = tag[i-1];
+				}
+				missNum++;
+			}
+		}
+		
+		total++;
 	}
-	
+	ratio = (float)missNum/(float)total;
+	printf("Access : %d\n",access);
+	printf("Miss : %d\n",missNum);
+	printf("Miss ratio : %.4f\n",ratio);
 	return 0;
 }
 
@@ -99,4 +171,15 @@ void Convert16to2(char *Hex_array)
 			binary[i] = temp;
 		}
 	}
+}
+int FindLocation(char *index,int indexNum, int a){
+	int i=0;
+	int d=1;
+	int sum=0;
+	for(i=indexNum-1;i>=0;i--){
+		if(index[i]=='1') sum+=d;
+		d*=2;
+	}
+	sum = sum%a;
+	return sum;
 }
