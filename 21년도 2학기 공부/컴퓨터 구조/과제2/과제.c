@@ -22,8 +22,15 @@ char binary[33];//16 -> 2진수로 변환 저장 공간
 
 int main()
 {
-	char str_file[20] = { 0 };
+	char str_file[100];
 
+	char tag[18]; //tag
+	int cache_size; //KB
+	int valid; //valid bit
+	int index;
+
+	int access = 0;
+	int missNum = 0;
 	// Trace file 입력 받기
 	printf("File : ");
 	scanf("%s", str_file);
@@ -33,7 +40,11 @@ int main()
 		printf("file open error");
 		exit(1);
 	}
+	printf("Unified cache size (KB) : ");
+	scanf("%d",&cache_size);
 	
+
+
 	Hex_array = (char *)malloc(sizeof(char) * 11);
 	
 	while(feof(fp)==0)		//파일 끝까지 문자열 불러오기.
@@ -49,15 +60,18 @@ int main()
 		//정수형 명령어의 특정 bit 자르기 예시 (tag 22bit, index 8bit, direct-mapped cache)
 		//index = (fetched_inst<<22);
 		//index = (index>>24); -> index에 해당하는 값이 저장됨
-		
-		if(operand == 0 || operand == 1)		//data cahce 동작 구현
-		{
-			printf("data %d    %s    %s\n",operand, Hex_array, binary);
-		}
-		if(operand == 2)				//inst cache 동작 구현
-		{
-			printf("inst %d    %s    %s\n",operand, Hex_array, binary);
-		}
+
+		// if(operand == 0 || operand == 1)		//data cahce 동작 구현
+		// {
+		// 	printf("data %d    %s    %s\n",operand, Hex_array, binary);
+		// }
+		// if(operand == 2)				//inst cache 동작 구현
+		// {
+		// 	printf("inst %d    %s    %s\n",operand, Hex_array, binary);
+		// }
+		//data 1    c7e33050    1 1000 1111 1100 0110//0110 0000 10// 10000
+
+
 	}
 	
 	return 0;
