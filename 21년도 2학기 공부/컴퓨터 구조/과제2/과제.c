@@ -105,14 +105,14 @@ int main()
 		// {
 		// printf("inst %d    %s    %s\n",operand, Hex_array, binary);
 		// }
-		//data 1    c7e33050    1 1000 1111 1100 0110//0110 0000 10// 10000
-		for(i=0;i<tagNum;i++){
+		
+		for(i=0;i<tagNum;i++){ //tag 저장
 			tag[i] = binary[i];
 		}
-		for(i=0;i<indexNum;i++){
+		for(i=0;i<indexNum;i++){ //index 저장
 			index[i] = binary[tagNum+i];
 		}
-		blockLocation = FindLocation(index,indexNum,bn);
+		blockLocation = FindLocation(index,indexNum,bn); //block의 위치
 		if(cache[blockLocation][0]=='0'){ //valid bit가 0이면
 			missNum++; //miss
 			cache[blockLocation][0]='1'; //valid bit 1로 변경
@@ -142,7 +142,7 @@ int main()
 		
 		total++;
 	}
-	ratio = (float)missNum/(float)total;
+	ratio = (float)missNum/(float)total; //miss rate 계산
 	printf("Access : %d\n",access);
 	printf("Miss : %d\n",missNum);
 	printf("Miss ratio : %.4f\n",ratio);
@@ -172,14 +172,14 @@ void Convert16to2(char *Hex_array)
 		}
 	}
 }
-int FindLocation(char *index,int indexNum, int a){
+int FindLocation(char *index,int indexNum, int a){ //block의 위치를 찾는 함수
 	int i=0;
 	int d=1;
 	int sum=0;
-	for(i=indexNum-1;i>=0;i--){
-		if(index[i]=='1') sum+=d;
+	for(i=indexNum-1;i>=0;i--){ 
+		if(index[i]=='1') sum+=d; //1이면 block위치(sum)에 d를 더해줌
 		d*=2;
 	}
-	sum = sum%a;
+	sum = sum%a; //mod계산
 	return sum;
 }
