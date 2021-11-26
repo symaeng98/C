@@ -82,16 +82,16 @@ void BFS(G *graph, int start){
         f++; //dequeue
         while(p!=NULL){
             if(graph->vertices[p->vIndex].visited==1&&p->type==0){ //이미 방문 + Tree아니면
-                p->type = 2;
+                p->type = 2; //cross
                 q = graph->vertices[p->vIndex].header->next;
                 while(q!=NULL){ 
                     if(dData+1==graph->vertices[q->vIndex].name){
-                        q->type = 1; //Tree
+                        q->type = 2; //cross
                         break;
                     }
                     q=q->next;
                 }
-                printf("%d %d\n",graph->vertices[p->vIndex].name, dData+1);
+                printf("%d %d\n",dData+1, graph->vertices[p->vIndex].name);
             }
             else if(graph->vertices[p->vIndex].visited==0){ //아직 방문 안했으면
                 p->type = 1; //Tree
