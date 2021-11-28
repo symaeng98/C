@@ -23,12 +23,13 @@ typedef struct Graph{
 }G;
 I *getIL(int end, int weight);
 void insertEdge(G *graph, int start, int end, int weight);
-void push(G *graph, V vertex);
+void push(G *graph, V *vertex);
 V pop(G *graph);
 void upHeap(G *graph, int index);
 void downHeap(G *graph, int index);
 void swap(G *graph, int index1, int index2);
 void PrimJarnikMST(G *graph, int start);
+int Index(G graph, int data);
 int main(){
     int n, m;
     int start, end, weight;
@@ -98,6 +99,7 @@ void upHeap(G *graph, int index){
     if(index==1) return;
     if(graph->heap[index].distance<graph->heap[index/2].distance){
         swap(graph,index,index/2);
+        upHeap(graph,index/2);
     }
     else return;
 }
@@ -107,6 +109,7 @@ void downHeap(G *graph, int index){
     if(index*2==graph->num){
         if(graph->heap[index].distance>graph->heap[index*2].distance){
             swap(graph,index,index*2);
+            downHeap(graph,index*2);
         }
     }
     else{
@@ -116,6 +119,7 @@ void downHeap(G *graph, int index){
         else min = index*2+1;
         if(graph->heap[min].distance<graph->heap[index].distance){
             swap(graph,min,index);
+            downHeap(graph,min);
         }
     }
 }
@@ -125,10 +129,17 @@ void swap(G *graph, int index1, int index2){
     graph->heap[index2] = graph->heap[index1];
     graph->heap[index1] = tmp;
 }
-void push(G *graph, V vertex){
+void push(G *graph, V *vertex){
     graph->num++;
-    graph->heap[graph->num] =  vertex;
+    graph->heap[graph->num] =  *vertex;
     upHeap(graph,graph->num);
+    vertex->position = Index(*graph,vertex->data);
+}
+int Index(G graph, int data){
+    int i;
+    for(i=1;i<=graph.num;i++){
+        if(graph.heap[i].data==data) return i;
+    }
 }
 V pop(G *graph){
     V data;
@@ -144,16 +155,22 @@ void PrimJarnikMST(G *graph, int start){
     I *p;
     graph->vertices[start].distance = 0;
     for(i=0;i<graph->vNum;i++){
-        push(graph,graph->vertices[i]);
+        push(graph,&graph->vertices[i]);
     }
     while(graph->num!=0){
         u = pop(graph);
+        // printf(" %d",u.data);
+        u.visited=1;//popÃ³¸®
         p = u.link->next;
         while(p!=NULL){
-            if(){
-                
+            if(graph->vertices[p->end].visited==0&&p->weight<graph->heap[graph->vertices[p->end].position].distance){
+                graph->heap[graph->vertices[p->end].position].distance = p->weight;
+                upHeap(graph,graph->vertices[p->end].position);
+                graph->vertices[p->end].position = Index(*graph,graph->vertices[p->end].data);
             }
             p=p->next;
         }
+        for(i=1;i<=graph->num;i++) printf("%d ",graph->heap[i].distance);
+        printf("\n");
     }
 }
