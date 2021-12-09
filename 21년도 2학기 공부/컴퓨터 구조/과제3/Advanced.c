@@ -73,6 +73,7 @@ int main(void)
 	unsigned int inst_25_0 = 0;
 	unsigned int jump_addr = 0;
 	unsigned int mem_result = 0;
+	unsigned int write_register = 0;
 	int total_cycle = 0;
 	
 	// register initialization
@@ -86,7 +87,7 @@ int main(void)
 	/**************************************/
 	mem[40] = 3578;
 
-	if ( !(fp = fopen("C:\\temp\\input_file\\3.txt", "r")) )
+	if ( !(fp = fopen("C:\\temp\\input_file\\5.txt", "r")) )
 	{
 		printf("error: file open fail !!\n");
 		exit(1);
@@ -122,7 +123,6 @@ int main(void)
 	while (pc < 64)
 	{
 		// pc +4
-		pc = pc_add_4;
 		pc_add_4 = Add(pc, 4);
 		// instruction fetch
 		inst = Inst_Fetch(pc);
@@ -133,10 +133,9 @@ int main(void)
 		inst_25_21 = (inst & 0x03e00000) >> 21; //rs
 		inst_20_16 = (inst & 0x001f0000) >> 16; //rt
 		inst_15_11 = (inst & 0x0000f800) >> 11; //rd
-		inst_5_0 = inst & 0x0000001f; //funct
+		inst_5_0 = inst & 0x0000003f; //funct
 		inst_15_0 = inst & 0x0000ffff; //rd 아니면 address
 		inst_25_0 = inst & 0x03ffffff; //jump address
-
 		//printf("%x, %x, %x, %x, %x, %x", inst_31_26, inst_25_21, inst_20_16, inst_15_11, inst_15_0, inst_25_0);
 
 		// instruction
@@ -156,28 +155,42 @@ int main(void)
 			printf(">> BEQ\n");
 		}
 
+		
+
 		// register read
 		Register_Read(inst_25_21,inst_20_16);
 
 		// create control signal
 		Control_Signal(inst_31_26);
 
+		//Write Register
+		mux_result = Mux(control.RegDst,inst_20_16,inst_15_11);
+		write_register = mux_result;
+
 		// create ALU control signal
 		ALU_control = ALU_Control_Signal(inst_5_0);
 
 		// ALU
-		ALU_func(ALU_control,inst_25_21,inst_20_16);
+		mux_result = Mux(control.ALUSrc,inst_20_16,Sign_Extend(inst_15_0));
+		ALU_func(ALU_control,inst_25_21,mux_result);
+
+		//pc
+		mux_result = Mux(alu.zero, pc_add_4, pc_add_4 + Shift_Left_2(Sign_Extend(inst_15_0)));
+		pc = Mux(control.Jump,mux_result,Shift_Left_2(inst_25_0));
 
 		// memory access
-		Memory_Access()
+		if(control.MemRead==1||control.MemWrite==1)
+			mem_result = Memory_Access(control.MemWrite, control.MemRead, alu.ALU_result, reg_read.Read_data_2);
+		
 		// register write
-		
-		
+		mux_result = Mux(control.MemtoReg,alu.ALU_result,mem_result);
+		Register_Write(control.RegWrite,write_register,mux_result);
+
 		total_cycle++;
 
 		// result
 		/********************************/
-		printf("PC : %d \n", pc_add_4);
+		printf("PC : %d \n", pc);
 		printf("Total cycle : %d \n", total_cycle);
 		print_reg_mem();
 		/********************************/
@@ -228,7 +241,7 @@ void Control_Signal(unsigned int opcode)
 		control.MemtoReg = 1;
 	}
 	else if(opcode==43){ //101011 SW
-		control.RegDst = 0;
+		control.RegDst = 'x';
 		control.Jump = 0;
 		control.Branch = 0;
 		control.MemRead = 0;
@@ -236,21 +249,21 @@ void Control_Signal(unsigned int opcode)
 		control.MemWrite = 1;
 		control.ALUSrc = 1;
 		control.RegWrite = 0;
-		control.MemtoReg = 0;
+		control.MemtoReg = 'x';
 	}
 	else if(opcode==2){ //000010 J
-		control.RegDst = 0;
+		control.RegDst = 'x';
 		control.Jump = 1;
-		control.Branch = 0;
-		control.MemRead = 0;
-		control.ALUOp = 0;
-		control.MemWrite = 0;
-		control.ALUSrc = 0;
-		control.RegWrite = 0;
-		control.MemtoReg = 0;
+		control.Branch = 'x';
+		control.MemRead = 'x';
+		control.ALUOp = 'x';
+		control.MemWrite = 'x';
+		control.ALUSrc = 'x';
+		control.RegWrite = 'x';
+		control.MemtoReg = 'x';
 	}
 	else if(opcode==4){ //000100 BEQ
-		control.RegDst = 0;
+		control.RegDst = 'x';
 		control.Jump = 0;
 		control.Branch = 1;
 		control.MemRead = 0;
@@ -258,47 +271,52 @@ void Control_Signal(unsigned int opcode)
 		control.MemWrite = 0;
 		control.ALUSrc = 0;
 		control.RegWrite = 0;
-		control.MemtoReg = 0;
+		control.MemtoReg = 'x';
 	}
 }
 
 unsigned char ALU_Control_Signal(unsigned char signal)
-{
-	if(control.ALUOp==10){ //add
-		return 0010;
-	}
-	else if(control.ALUOp==00){ //lw,sw
-		return 0010;
-	}
-	else if(control.ALUOp==01){ //beq
-		return 0110;
-	}
-	else{ //jump
-
-	}
+{	
+	if(control.ALUOp==10 && signal == 32) { // add
+        return 0010;
+    }
+    else if(control.ALUOp==00) return 0010; //lw, sw
+	else if(control.ALUOp==01) return 0110;
 }
 
 void ALU_func(unsigned char ALU_control, unsigned int a, unsigned int b)
 {
-	if(ALU_control==0010&&){ //
-		alu.ALU_result = a+b;
+	if(ALU_control==0010&&control.ALUSrc==0){ //add
+		alu.ALU_result = reg_read.Read_data_1+reg_read.Read_data_2;
 		alu.zero = 0;
 	}
-	else if(ALU_control==0010&&)
-	else{ //subtract
-		alu.ALU_result = a-b;
-		alu.zero = 1;
+	else if(ALU_control==0010&&control.ALUSrc==1){ //lw, sw
+		alu.ALU_result = a+b/4; //주소
+		alu.zero = 0;
+	}
+	else{ //branch
+		alu.ALU_result = reg_read.Read_data_1-reg_read.Read_data_2;
+		if(alu.ALU_result==0) alu.zero = 1;
+		else alu.zero = 0;
 	}
 }
 
 unsigned int Memory_Access(unsigned char MemWrite, unsigned char MemRead, unsigned int addr, unsigned int write_data)
 {
-
+	if(MemWrite==1){
+		reg[addr] = write_data;
+	}
+	else if(MemRead==1){
+		return reg[addr];
+	}
 }
 
 void Register_Write(unsigned char RegWrite, unsigned int Write_reg, unsigned int Write_data)
 {
-	
+	if(RegWrite==0) return;
+	else{
+		reg[Write_reg] = Write_data;
+	}
 }
 
 unsigned int Sign_Extend(unsigned int inst_16)
@@ -323,7 +341,12 @@ unsigned int Shift_Left_2(unsigned int inst)
 
 unsigned int Mux(char signal, unsigned int a_0, unsigned int b_1)
 {
-	
+	if(signal==0){
+		return a_0;
+	}
+	else if(signal==1){
+		return b_1;
+	}
 }
 
 unsigned int Add(unsigned int a, unsigned int b)
