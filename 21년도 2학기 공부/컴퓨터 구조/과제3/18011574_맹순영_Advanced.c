@@ -87,7 +87,7 @@ int main(void)
 	/**************************************/
 	mem[40] = 3578;
 
-	if ( !(fp = fopen("3.txt", "r")) )
+	if ( !(fp = fopen("C:\\temp\\input_file\\4.txt", "r")) )
 	{
 		printf("error: file open fail !!\n");
 		exit(1);
@@ -173,7 +173,7 @@ int main(void)
 		// ALU
 		mux_result = Mux(control.ALUSrc,inst_20_16,Sign_Extend(inst_15_0));
 		ALU_func(ALU_control,inst_25_21,mux_result);
-
+		
 		//pc
 		mux_result = Mux(alu.zero, pc_add_4, pc_add_4 + Shift_Left_2(Sign_Extend(inst_15_0)));
 		pc = Mux(control.Jump,mux_result,Shift_Left_2(inst_25_0));
@@ -291,7 +291,7 @@ void ALU_func(unsigned char ALU_control, unsigned int a, unsigned int b)
 		alu.zero = 0;
 	}
 	else if(ALU_control==0010&&control.ALUSrc==1){ //lw, sw
-		alu.ALU_result = a+b/4; //аж╪р
+		alu.ALU_result = reg[a]+b;
 		alu.zero = 0;
 	}
 	else{ //branch
@@ -304,10 +304,10 @@ void ALU_func(unsigned char ALU_control, unsigned int a, unsigned int b)
 unsigned int Memory_Access(unsigned char MemWrite, unsigned char MemRead, unsigned int addr, unsigned int write_data)
 {
 	if(MemWrite==1){
-		reg[addr] = write_data;
+		mem[addr] = write_data;
 	}
 	else if(MemRead==1){
-		return reg[addr];
+		return mem[addr];
 	}
 }
 
