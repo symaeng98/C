@@ -87,7 +87,7 @@ int main(void)
 	/**************************************/
 	mem[40] = 3578;
 
-	if ( !(fp = fopen("C:\\temp\\input_file\\4.txt", "r")) )
+	if ( !(fp = fopen("3.txt", "r")) )
 	{
 		printf("error: file open fail !!\n");
 		exit(1);
